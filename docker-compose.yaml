@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: todo_db
+      POSTGRES_USER: larson
+      POSTGRES_PASSWORD: JamesBond007
+    networks:
+      - todo-net
+
+  web:
+    build: .
+    command: gunicorn todoapp.wsgi:application --bind 0.0.0.0:8000
+    entrypoint: ["/app/entrypoint.sh"]
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DEBUG=True
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - POSTGRES_DB=todo_db
+      - POSTGRES_USER=larson
+      - POSTGRES_PASSWORD=JamesBond007
+    networks:
+      - todo-net
+
+volumes:
+  postgres_data:
+
+networks:
+  todo-net:
